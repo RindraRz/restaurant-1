@@ -6,7 +6,7 @@ use App\Entity\Plat;
 use App\Repository\PlatRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class PlatService
+class VenteService
 {
     private $platRepository;
     private $entityManager;
@@ -16,6 +16,6 @@ class PlatService
         $this->platRepository = $platRepository;
         $this->entityManager = $entityManager;
     }
-    
+
 
 }
