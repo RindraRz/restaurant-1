@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     git \
     unzip \
+    nginx \  # Ajoutez Nginx
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql xml zip
 
@@ -42,10 +43,13 @@ RUN chmod -R 777 var/cache var/log
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs --no-scripts
 
 # Exécuter les scripts Symfony manuellement
-RUN php bin/console cache:clear --env=prod
+RUN php bin/console cache:warmup --env=prod -v || (cat var/log/prod.log && exit 1)
 
-# Exposer le port 9000 pour PHP-FPM
-EXPOSE 9000
+# Copier la configuration Nginx
+COPY --chown=appuser ./docker/nginx.conf /etc/nginx/nginx.conf
 
-# Lancer PHP-FPM
-CMD ["php-fpm"]
+# Exposer le port 80 pour Nginx
+EXPOSE 80
+
+# Lancer Nginx et PHP-FPM
+CMD ["sh", "-c", "nginx && php-fpm"]
